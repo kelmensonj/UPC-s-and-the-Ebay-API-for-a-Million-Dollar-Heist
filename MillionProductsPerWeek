@@ -10,7 +10,7 @@ import os
 #insert your appid,devid,and certid
 
 apiF_2 = finding(appid = "", devid = '', certid = '', config_file = None)
-apiF = finding(appid = "", devid = 'fd2f61fd-1cf0-42e9-b43e-ffbe6150d000', certid = '', config_file = None)
+apiF = finding(appid = "", devid = '', certid = '', config_file = None)
 
 SCRAPE_LIST = []
 KEYWORDS = []
