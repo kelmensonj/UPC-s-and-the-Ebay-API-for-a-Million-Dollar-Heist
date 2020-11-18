@@ -9,7 +9,7 @@ import os
 
 #insert your appid,devid,and certid
 
-apiF_2 = finding(appid = "", devid = '', certid = '', config_file = None)
+apiF_2 = finding(appid = "", devid = '', certid = '', config_file = None) #Ebay only allows 5000 API calls per day, but you can easily create multiple accounts
 apiF = finding(appid = "", devid = '', certid = '', config_file = None)
 
 SCRAPE_LIST = []
@@ -27,7 +27,7 @@ API_CALL_COUNTER = 0
 def initiateDataframe():
 	rowsData = []
 	x = pandas.DataFrame(rowsData,columns=['UPC', 'URL', 'Price', 'Condition', 'Feedback', 'Seller','Username', 'EAN', 'Timestamp', 'URLcheck'])
-	x.to_csv('xX_MASTER_LIST_Xx.csv')
+	x.to_csv('xX_MASTER_LIST_Xx.csv') #a simple pandas DataFrame is initiated. You could alter the name here
 
 def urlExecutor(urls):
 	global INTERNET
@@ -151,34 +151,34 @@ def getProductByUPC(upc):
 	LIST_DF.append(pgProductsDf)			
 
 def yoyoExecutor(keys):
-	global CALLS
+	global CALLS #CALLS contains arguments that access the Ebay API
 	global MIN_PRICE
 	global apiF
 	global apiF_2    
 	for key in keys:			
-		MIN_PRICE = 1.00
+		MIN_PRICE = 1.00 #for each keyword query, we reset the MIN_PRICE to $1, and then call the yoyo() function
 		print(key)
 		yoyo(CALLS[0],CALLS[1],key,apiF)
-	for key in keys:
-		MIN_PRICE = 1.00
-		print(key)
+	for key in keys: #change this, I'm pretty sure I should have a counter to make sure I don't requery a keyword
+		MIN_PRICE = 1.00 #but anyway, the point here is to just do the same thing but get extra API calls. You could rework this whole function
+		print(key)	 #for basically unlimited API calls
 		yoyo(CALLS[0],CALLS[1],key,apiF_2)
 		
 		
 def yoyo(call,parameter,key,api):
-	rowsData = []
+	rowsData = [] #we clear our rows of data 
 	global MIN_PRICE
 	global DATASAVER
 	global LIST_DF
 	global API_CALL_COUNTER 
-	totalentries = 0										
+	totalentries = 0 									
 	try:
 		productMush = BeautifulSoup(api.execute(call,{parameter : key,'outputSelector':['SellerInfo','StoreInfo','shippingServiceCost'], 'sortOrder': 'PricePlusShippingLowest','itemFilter':[{'name':'ListingType','value':'FixedPrice'}, {'name' : 'MinPrice', 'value' : MIN_PRICE},{'name' : 'MaxPrice', 'value' : 150}]}).content, 'lxml')
-		API_CALL_COUNTER += 1
+		API_CALL_COUNTER += 1 #productMush is the soup of the html from an ebay url. 200 products are in that url. For more info above check the Ebay API
 		productsInfo = productMush.find_all('item')
-		totalentries = int(productMush.find('totalentries').text)
+		totalentries = int(productMush.find('totalentries').text) 
 		if len(productsInfo) > 0:
-			for item in productsInfo:
+			for item in productsInfo: #there's lots of different ways to create listings on ebay, so below I've handled missing data with try and except
 				try:
 					try:
 						feedback = item.feedbackscore.string.encode("utf-8")
@@ -206,19 +206,19 @@ def yoyo(call,parameter,key,api):
 							pricePlus = float(price)
 							print(pricePlus)
 						else:
-							pricePlus = float(price) + float(shipping)
+							pricePlus = float(price) + float(shipping) #price alone doesnt mean much. We want price plus shipping
 							print(pricePlus)
 					except:
 						print('heres the problem')
 						pricePlus = price,shipping
-					if pricePlus >= MIN_PRICE:
-						MIN_PRICE = pricePlus + .5
+					if pricePlus >= MIN_PRICE: #a very important line. This is how we paginate the thousands of results pages. We continually raise the MIN_PRICE
+						MIN_PRICE = pricePlus + .5 #Raising the MIN_PRICE to the highest price product per page means no duplicates, plus we get all the listings
 					try:
 						condition = item.conditionid.string.encode("utf-8")
 					except:
 						condition = 'unfound'
 					row = ['no upc', url, pricePlus, title, condition, feedback, seller, user, ' ', time.strftime("%Y%m%d%H%M"), ' ']  
-					rowsData.append(row)   
+					rowsData.append(row)    #now we're just adding a row of data to a list. This will be easy to turn into a DataFrame
 					print("Extracted product data in yoyo")	                                             		
 				except:
 					pass
@@ -226,39 +226,39 @@ def yoyo(call,parameter,key,api):
 		print("No items found in yoyo, possible API call limit overrun")
 		pass
 
-	pgProductsDf = pandas.DataFrame(rowsData, columns=MASTER_KEYS)
-	LIST_DF.append(pgProductsDf)
-	if (totalentries >= 200) and (API_CALL_COUNTER <= 5000):
-		yoyo(call,parameter,key,api)
+	pgProductsDf = pandas.DataFrame(rowsData, columns=MASTER_KEYS) #now we create the DataFrame for this page of results
+	LIST_DF.append(pgProductsDf)  #and then we add to a list of DataFrames, one DataFrame for each results page
+	if (totalentries >= 200) and (API_CALL_COUNTER <= 5000): #if a page has less than 200 entries, its the last page of results. Also, we don't want to keep querying urls if we've hit the Ebay 5000 call limit
+		yoyo(call,parameter,key,api) #but if we're not on the last page and we haven't hit the limit, we call yoyo() again except now the MIN_PRICE has been raised so its new results
 	else:
-		API_CALL_COUNTER = 0	
+		API_CALL_COUNTER = 0 #this will finish this function
 			
 def main():
 	try:
-		master = pandas.read_csv('xX_MASTER_LIST_Xx.csv')
-		print("Successfully loaded dataframe")
+		master = pandas.read_csv('xX_MASTER_LIST_Xx.csv') #important, you're gonna have to create a new directory if you want to do totally separate scrapes
+		print("Successfully loaded dataframe") #the try and except here checks if you've already started a scrape, if not, it intitiates a DataFrame
 	except:
 		initiateDataframe()
 		print("Initiated dataframe named 'xX_MASTER_LIST_Xx.csv'")
-	print("Input a list of keywords separated by commas")
-	#keyword_list = [str(x) for x in input().split(',')]
+	print("Input a list of keywords separated by commas") #in the command line, you can type a list of queries separated by commas. For example, 'basketball shoes, iphone, cordless drill'
+	#keyword_list = [str(x) for x in input().split(',')] #here you would add an input line
 	global SCRAPE_LIST
-	keyword_list = ['sacd','dvd audio','blu-ray audio']
-	yoyoExecutor(keyword_list)
-	if len(LIST_DF) != 0:
+	keyword_list = ['sacd','dvd audio','blu-ray audio'] #but the way I did it was I just altered this list here
+	yoyoExecutor(keyword_list) #then yoyoexecutor is called. This function will run for days depending on various parameters
+	if len(LIST_DF) != 0: #now we have a list of DataFrames. If you entered no keywords, you skip to the else below
 		print('Adding new products to the master list')
-		master = pandas.concat(LIST_DF)
-		master = master.drop_duplicates(subset='URL', keep="first")
-		cols = [c for c in master.columns if c.lower()[:4] != 'unna']
+		master = pandas.concat(LIST_DF) #simple concat
+		master = master.drop_duplicates(subset='URL', keep="first") #there will be duplicates. Listings constantly change in price
+		cols = [c for c in master.columns if c.lower()[:4] != 'unna'] #one of my issues with pandas shown here
 		master=master[cols]
-		master.to_csv('tempNOupcList.csv')
+		master.to_csv('tempNOupcList.csv') #basically just a backup, useful for debugging
 		print('Stored csv without upc codes, just in case')
 	else:
 		print('LIST_DF empty, loading master list')
-		master = pandas.read_csv('xX_MASTER_LIST_Xx.csv')
+		master = pandas.read_csv('xX_MASTER_LIST_Xx.csv') #read master list
 		master = master.drop_duplicates(subset='URL', keep="first")
-	list_url = master['URL'].loc[master['UPC'] == 'no upc'].unique()
-	urlExecutor(list_url) 
+	list_url = master['URL'].loc[master['UPC'] == 'no upc'].unique() #gets all the listing page urls for which the API didn't return UPC codes, all of them
+	urlExecutor(list_url) #now we go to get the UPC codes, as you can see, you can feel free to exit the program whenever you want. 
 	mapUPC(master)
 	
 	
