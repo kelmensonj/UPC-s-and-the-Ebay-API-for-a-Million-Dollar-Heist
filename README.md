@@ -3,7 +3,12 @@ This was my first major foray into python. It's a parallelized web scraper with 
 
 ![alt-text](https://github.com/kelmensonj/UPC-s-and-the-Ebay-API-for-a-Million-Dollar-Heist/blob/master/libre_upc.gif)
 
-There are some dependencies for this script. I did:
+There are some dependencies for this script. For Ubuntu 21.04, I did:
+
+```
+pip3 install BeautifulSoup4
+pip3 install pandas
+```
 
 Then, you would need to use this link to get the Ebay API's: https://github.com/timotheus/ebaysdk-python
 
