@@ -1,4 +1,7 @@
 # UPC-s-and-the-Ebay-API-for-a-Million-Dollar-Heist
+
+Warning: this script is now broken for two reasons. One is that it used the old version of the Ebay API's. There's a link below to fix this. And two, it's a crawler, and like any crawler, falls victim to changes to a website's layout.
+
 This was my first major foray into python. It's a parallelized web scraper with an auto saving database. I managed to make it go pretty fast, grabbing a combination of data using the Ebay API directly, as well as some basic html scraping for the UPC codes. These UPC codes are very valuable - there are databases online that can cost thousands of dollars over time but this is a pretty good way around that. I think I could build this database up to the same size as any other online database using code pretty similar to this. Below is a gif of the file where I saved all the product data:
 
 ![alt-text](https://github.com/kelmensonj/UPC-s-and-the-Ebay-API-for-a-Million-Dollar-Heist/blob/master/libre_upc.gif)
