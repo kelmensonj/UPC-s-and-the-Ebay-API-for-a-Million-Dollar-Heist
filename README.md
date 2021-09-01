@@ -3,6 +3,10 @@ This was my first major foray into python. It's a parallelized web scraper with 
 
 ![alt-text](https://github.com/kelmensonj/UPC-s-and-the-Ebay-API-for-a-Million-Dollar-Heist/blob/master/libre_upc.gif)
 
+There are some dependencies for this script. I did:
+
+Then, you would need to use this link to get the Ebay API's: https://github.com/timotheus/ebaysdk-python
+
 A few thing this crawler did:
 
 * Integrates Ebay Shopping and Finding API's with Beautiful Soup and the Requests library in order to get supplemental data
